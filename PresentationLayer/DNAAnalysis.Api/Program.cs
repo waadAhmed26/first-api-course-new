@@ -12,6 +12,10 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using DNAAnalysis.Persistence;
 using DNAAnalysis.Persistence.Data.DBContexts;
+using DNAAnalysis.Persistence.Repository;
+using AutoMapper;
+
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +65,7 @@ builder.Services.AddDbContext<DNAAnalysisDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("IdentityConnection"));
 });
+
 // ================= Services =================
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddKeyedScoped<IDataInitializer, IdentityDataInitializer>("Identity");
@@ -71,12 +76,22 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IOtpRepository, OtpRepository>();
+
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// ===== Generic Repository + Unit Of Work =====
+builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// ===== Genetic Module Services =====
+builder.Services.AddScoped<IGeneticRequestService, GeneticRequestService>();
+
+// ===== AutoMapper =====
+
+builder.Services.AddAutoMapper(typeof(GeneticRequestService));
 
 // ================= JWT Authentication =================
 builder.Services.AddAuthentication(options =>
@@ -110,11 +125,9 @@ await app.SeedIdentityDatabaseAsync();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-

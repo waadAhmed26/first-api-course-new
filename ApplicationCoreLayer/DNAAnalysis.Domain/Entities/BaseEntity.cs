@@ -1,15 +1,13 @@
-using System;
-
 namespace DNAAnalysis.Domain.Entities
 {
-    public class BaseEntity
+    public abstract class BaseEntity<TKey>
     {
-        public int Id { get; set; }
+        public TKey Id { get; set; } = default!;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 
-        public bool IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; }
     }
 }

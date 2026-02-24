@@ -1,18 +1,19 @@
 using DNAAnalysis.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using DNAAnalysis.Shared.Enums;
 
 namespace DNAAnalysis.Domain.Entities.GeneticModule
 {
-    public class GeneticRequest : BaseEntity
+    public class GeneticRequest : BaseEntity<int>
     {
-        public string FatherFilePath { get; set; }
-        public string MotherFilePath { get; set; }
+        public string FatherFilePath { get; set; } = default!;
+        public string MotherFilePath { get; set; } = default!;
         public string? ChildFilePath { get; set; }
 
-        public bool IsProcessed { get; set; } = false;
+       public RequestStatus Status { get; set; } = RequestStatus.Pending;
 
         // 🔹 Foreign Key
-        public string UserId { get; set; }
+        public string UserId { get; set; } = default!;
 
         // 🔹 Navigation Property
        // public ApplicationUser User { get; set; }

@@ -3,9 +3,12 @@
   <ItemGroup>
     <ProjectReference Include="..\DNAAnalysis.Services.Abstraction\DNAAnalysis.Services.Abstraction.csproj" />
     <ProjectReference Include="..\DNAAnalysis.Domain\DNAAnalysis.Domain.csproj" />
+    <ProjectReference Include="..\..\DNAAnalysis.Shared\DNAAnalysis.Shared.csproj" />   <!-- 👈 ضيفي ده -->
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
   </ItemGroup>
 
