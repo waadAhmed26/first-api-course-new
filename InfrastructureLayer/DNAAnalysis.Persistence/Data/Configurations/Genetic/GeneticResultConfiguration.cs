@@ -23,6 +23,11 @@ namespace DNAAnalysis.Persistence.Configurations.Genetic
 
             builder.Property(x => x.Advice)
                    .IsRequired();
+
+
+                   builder.HasOne(x => x.GeneticRequest)
+       .WithOne(x => x.Result)
+       .HasForeignKey<GeneticResult>(x => x.GeneticRequestId);
         }
     }
 }

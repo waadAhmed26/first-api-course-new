@@ -2,9 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using DNAAnalysis.Domain.Contracts;
 using DNAAnalysis.Domain.Entities;
 using DNAAnalysis.Persistence.Data.DBContexts;
+using System.Linq.Expressions;
+
 
 namespace DNAAnalysis.Persistence.Repository
 {
+
     public class GenericRepository<TEntity, TKey>
         : IGenericRepository<TEntity, TKey>
         where TEntity : BaseEntity<TKey>
@@ -30,5 +33,11 @@ namespace DNAAnalysis.Persistence.Repository
 
         public void Update(TEntity entity)
             => _dbContext.Set<TEntity>().Update(entity);
+
+            public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate)
+{
+    return await _dbContext.Set<TEntity>()
+                           .FirstOrDefaultAsync(predicate);
+}
     }
 }

@@ -88,6 +88,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // ===== Genetic Module Services =====
 builder.Services.AddScoped<IGeneticRequestService, GeneticRequestService>();
+builder.Services.AddScoped<IGeneticResultService, GeneticResultService>();
 
 // ===== AutoMapper =====
 
