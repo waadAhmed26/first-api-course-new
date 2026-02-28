@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using DNAAnalysis.Shared.Enums;
 
 
+
 namespace DNAAnalysis.Domain.Entities.GeneticModule
 {
     public class GeneticRequest : BaseEntity<int>

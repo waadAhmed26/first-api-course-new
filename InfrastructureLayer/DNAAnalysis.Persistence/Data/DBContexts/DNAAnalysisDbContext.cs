@@ -1,6 +1,7 @@
 using DNAAnalysis.Domain.Entities.GeneticModule;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using DNAAnalysis.Domain.Entities.DrugModule;
 
 namespace DNAAnalysis.Persistence.Data.DBContexts
 {
@@ -14,6 +15,7 @@ namespace DNAAnalysis.Persistence.Data.DBContexts
         // ✅ هنا بنعمل DbSet لكل Entity في الموديول
         public DbSet<GeneticRequest> GeneticRequests { get; set; }
         public DbSet<GeneticResult> GeneticResults { get; set; }
+        public DbSet<DrugInteraction> DrugInteractions { get; set; }
 
         // ✅ هنا بنخلي EF يشوف كل Configurations اللي عملناها
         protected override void OnModelCreating(ModelBuilder modelBuilder)
