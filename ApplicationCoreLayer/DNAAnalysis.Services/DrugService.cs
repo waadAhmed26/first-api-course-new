@@ -22,7 +22,7 @@ public class DrugService : IDrugService
         _drugClient = drugClient;
     }
 
-    // ================= GET ALL =================
+    // ================= ADMIN ONLY =================
     public async Task<IEnumerable<DrugInteractionDto>> GetAllAsync()
     {
         var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
@@ -30,8 +30,8 @@ public class DrugService : IDrugService
         return _mapper.Map<IEnumerable<DrugInteractionDto>>(drugs);
     }
 
-    // ================= GET BY ID =================
-    public async Task<DrugInteractionDto?> GetByIdAsync(int id)
+    // ================= GET BY ID (SECURE) =================
+    public async Task<DrugInteractionDto?> GetByIdAsync(int id, string userId, bool isAdmin)
     {
         var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
         var drug = await repo.GetByIdAsync(id);
@@ -39,20 +39,13 @@ public class DrugService : IDrugService
         if (drug is null)
             return null;
 
+        if (!isAdmin && drug.UserId != userId)
+            return null;
+
         return _mapper.Map<DrugInteractionDto>(drug);
     }
 
-    // ================= ADD =================
-    public async Task AddAsync(DrugInteractionDto dto)
-    {
-        var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
-        var entity = _mapper.Map<DrugInteraction>(dto);
-
-        await repo.AddAsync(entity);
-        await _unitOfWork.SaveChangeAsync();
-    }
-
-    // ================= GET USER HISTORY (SQL Filtered) =================
+    // ================= USER HISTORY =================
     public async Task<IEnumerable<DrugInteractionDto>> GetUserDrugInteractionsAsync(string userId)
     {
         var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
@@ -64,37 +57,40 @@ public class DrugService : IDrugService
     }
 
     // ================= DELETE =================
-    public async Task<bool> DeleteInteractionAsync(int id, string userId)
+    public async Task<bool> DeleteInteractionAsync(int id, string userId, bool isAdmin)
     {
         var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
-
         var interaction = await repo.GetByIdAsync(id);
 
         if (interaction is null)
             return false;
 
-        if (interaction.UserId != userId)
+        if (!isAdmin && interaction.UserId != userId)
             return false;
 
         repo.Remove(interaction);
-
         await _unitOfWork.SaveChangeAsync();
 
         return true;
     }
 
-    // ================= CHECK INTERACTION (AI) =================
+    // ================= CHECK INTERACTION =================
     public async Task<DrugInteractionDto> CheckInteractionAsync(
         CheckDrugInteractionRequest request,
         string userId)
     {
-        // 1️⃣ Call AI Client
+        if (string.IsNullOrWhiteSpace(request.Drug1) ||
+            string.IsNullOrWhiteSpace(request.Drug2))
+            throw new ArgumentException("Drug names cannot be empty");
+
+        if (request.Drug1.Trim().ToLower() ==
+            request.Drug2.Trim().ToLower())
+            throw new ArgumentException("Cannot compare the same drug");
+
         var aiResult = await _drugClient.CheckInteractionAsync(request);
 
-        // 2️⃣ Attach UserId
         aiResult.UserId = userId;
 
-        // 3️⃣ Save to Database
         var repo = _unitOfWork.GetRepository<DrugInteraction, int>();
         var entity = _mapper.Map<DrugInteraction>(aiResult);
 
