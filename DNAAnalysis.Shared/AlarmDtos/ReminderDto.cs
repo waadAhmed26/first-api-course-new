@@ -8,13 +8,17 @@ public class ReminderDto
 
     public string Title { get; set; } = null!;
 
+    
     public string? Description { get; set; }
 
     public ReminderType ReminderType { get; set; }
 
+    
     public DateTime Date { get; set; }
 
-    public TimeSpan Time { get; set; }
+    public TimeSpan StartTime { get; set; }
 
-    public bool IsCompleted { get; set; }
+    public TimeSpan? EndTime { get; set; }
+
+    public ReminderStatus Status { get; set; }
 }

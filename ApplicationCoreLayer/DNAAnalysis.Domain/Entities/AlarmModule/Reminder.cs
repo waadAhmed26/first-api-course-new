@@ -13,11 +13,17 @@ public class Reminder : BaseEntity<int>
 
     public ReminderType ReminderType { get; set; }
 
+    
     public DateTime Date { get; set; }
 
-    public TimeSpan Time { get; set; }
+    // ✅ بدل Time
+    public TimeSpan StartTime { get; set; }
 
-    public bool IsCompleted { get; set; } = false;
+    public TimeSpan? EndTime { get; set; }
 
+    // ✅ بدل IsCompleted
+    public ReminderStatus Status { get; set; } = ReminderStatus.Pending;
     
+    
+    // public ApplicationUser User { get; set; }
 }

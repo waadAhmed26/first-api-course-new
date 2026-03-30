@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DNAAnalysis.Domain.Entities.AlarmModule;
-
+using DNAAnalysis.Shared.Enums;
 
 namespace DNAAnalysis.Persistence.Data.Configurations.Alarm;
 
@@ -24,19 +24,21 @@ public class ReminderConfiguration : IEntityTypeConfiguration<Reminder>
         builder.Property(r => r.Date)
                .IsRequired();
 
-        builder.Property(r => r.Time)
+        builder.Property(r => r.StartTime)
                .IsRequired();
+
+        builder.Property(r => r.EndTime);
 
         builder.Property(r => r.ReminderType)
                .IsRequired();
 
-        builder.Property(r => r.IsCompleted)
-               .HasDefaultValue(false);
+        builder.Property(r => r.Status)
+               .IsRequired()
+               .HasDefaultValue(ReminderStatus.Pending);
 
         builder.Property(r => r.IsDeleted)
                .HasDefaultValue(false);
 
-        // 🔥 أهم حاجة (زي ما عملنا تحسين في Drug)
         builder.HasIndex(r => new { r.UserId, r.Date });
     }
 }
