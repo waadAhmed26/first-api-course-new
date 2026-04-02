@@ -108,12 +108,15 @@ builder.Services.AddScoped<IGeneticResultService, GeneticResultService>();
 // ===== AutoMapper =====
 builder.Services.AddAutoMapper(typeof(DrugProfile).Assembly);
 
+
 // ===== Drug Module Service =====
 builder.Services.AddScoped<IDrugService, DrugService>();
 builder.Services.AddScoped<IDrugInteractionClient, FakeDrugInteractionClient>();
 
 // ===== Nutrition Module Service =====
 builder.Services.AddScoped<INutritionService, NutritionService>();
+// ===== Alarm Module Service =====
+builder.Services.AddScoped<IReminderService, ReminderService>();
 
 // ================= JWT Authentication =================
 builder.Services.AddAuthentication(options =>
