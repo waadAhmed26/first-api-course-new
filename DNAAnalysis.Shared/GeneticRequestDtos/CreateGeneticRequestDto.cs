@@ -1,3 +1,5 @@
+using DNAAnalysis.Shared.Enums;
+
 namespace DNAAnalysis.Shared.GeneticRequestDtos;
 
 public class CreateGeneticRequestDto
@@ -5,5 +7,7 @@ public class CreateGeneticRequestDto
     public string FatherFilePath { get; set; } = default!;
     public string MotherFilePath { get; set; } = default!;
     public string? ChildFilePath { get; set; }
-}
 
+    // ✅ NEW
+    public TestType TestType { get; set; }
+}

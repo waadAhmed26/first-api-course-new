@@ -11,48 +11,30 @@ namespace DNAAnalysis.Api.Validators
 
         public CreateGeneticRequestFormValidator()
         {
-            RuleFor(x => x)
-                .Must(HaveValidFileCombination)
-                .WithMessage("You must upload either a combined file OR father and mother files.");
+            // ✅ Required files
+            RuleFor(x => x.FatherFile)
+                .NotNull()
+                .WithMessage("Father file is required.");
 
-            When(x => x.CombinedFile != null, () =>
-            {
-                RuleFor(x => x.CombinedFile!)
-                    .Must(BeValidFile)
-                    .WithMessage("Invalid combined file (type or size).");
-            });
+            RuleFor(x => x.MotherFile)
+                .NotNull()
+                .WithMessage("Mother file is required.");
 
-            When(x => x.FatherFile != null, () =>
-            {
-                RuleFor(x => x.FatherFile!)
-                    .Must(BeValidFile)
-                    .WithMessage("Invalid father file (type or size).");
-            });
+            // ✅ Validation
+            RuleFor(x => x.FatherFile!)
+                .Must(BeValidFile)
+                .WithMessage(GetFileErrorMessage("Father file"));
 
-            When(x => x.MotherFile != null, () =>
-            {
-                RuleFor(x => x.MotherFile!)
-                    .Must(BeValidFile)
-                    .WithMessage("Invalid mother file (type or size).");
-            });
+            RuleFor(x => x.MotherFile!)
+                .Must(BeValidFile)
+                .WithMessage(GetFileErrorMessage("Mother file"));
 
             When(x => x.ChildFile != null, () =>
             {
                 RuleFor(x => x.ChildFile!)
                     .Must(BeValidFile)
-                    .WithMessage("Invalid child file (type or size).");
+                    .WithMessage(GetFileErrorMessage("Child file"));
             });
-        }
-
-        private bool HaveValidFileCombination(CreateGeneticRequestFormDto dto)
-        {
-            if (dto.CombinedFile != null)
-                return true;
-
-            if (dto.FatherFile != null && dto.MotherFile != null)
-                return true;
-
-            return false;
         }
 
         private bool BeValidFile(IFormFile file)
@@ -63,6 +45,11 @@ namespace DNAAnalysis.Api.Validators
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             return AllowedExtensions.Contains(extension);
+        }
+
+        private string GetFileErrorMessage(string fileName)
+        {
+            return $"{fileName} is invalid. Allowed types: (.txt, .csv, .vcf) and max size is 5 MB.";
         }
     }
 }

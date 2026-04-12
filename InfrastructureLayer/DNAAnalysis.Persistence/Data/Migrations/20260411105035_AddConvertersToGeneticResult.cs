@@ -5,7 +5,7 @@
 namespace DNAAnalysis.Persistence.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUniqueIndexToNutritionPlan : Migration
+    public partial class AddConvertersToGeneticResult : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

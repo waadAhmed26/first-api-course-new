@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using DNAAnalysis.API.Responses;
 
 namespace DNAAnalysis.Api.Controllers
+
 {
     [ApiController]
     [Route("api/[controller]")]

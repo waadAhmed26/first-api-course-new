@@ -14,9 +14,6 @@ public class GeneticRequestsController : ControllerBase
 {
     private readonly IGeneticRequestService _service;
 
-    private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
-    private readonly string[] AllowedExtensions = { ".txt", ".csv", ".vcf" };
-
     public GeneticRequestsController(IGeneticRequestService service)
     {
         _service = service;
@@ -34,48 +31,27 @@ public class GeneticRequestsController : ControllerBase
             return Unauthorized(new ApiResponse<string>(
                 new List<string> { "Unauthorized" }, "User not authenticated"));
 
-        string? fatherPath = null;
-        string? motherPath = null;
+        string? fatherPath;
+        string? motherPath;
         string? childPath = null;
 
-        if (form.CombinedFile != null)
+        // ✅ Save Father & Mother (Required)
+        fatherPath = await SaveFileAsync(form.FatherFile!);
+        motherPath = await SaveFileAsync(form.MotherFile!);
+
+        // ✅ Save Child (Optional)
+        if (form.ChildFile != null)
         {
-            if (!ValidateFile(form.CombinedFile))
-                return BadRequest(new ApiResponse<string>(
-                    new List<string> { "Invalid file (type or size)" }, "Validation Error"));
-
-            fatherPath = await SaveFileAsync(form.CombinedFile);
-        }
-        else if (form.FatherFile != null && form.MotherFile != null)
-        {
-            if (!ValidateFile(form.FatherFile) || !ValidateFile(form.MotherFile))
-                return BadRequest(new ApiResponse<string>(
-                    new List<string> { "Invalid file (type or size)" }, "Validation Error"));
-
-            fatherPath = await SaveFileAsync(form.FatherFile);
-            motherPath = await SaveFileAsync(form.MotherFile);
-
-            if (form.ChildFile != null)
-            {
-                if (!ValidateFile(form.ChildFile))
-                    return BadRequest(new ApiResponse<string>(
-                        new List<string> { "Invalid child file" }, "Validation Error"));
-
-                childPath = await SaveFileAsync(form.ChildFile);
-            }
-        }
-        else
-        {
-            return BadRequest(new ApiResponse<string>(
-                new List<string> { "Invalid file input" }, "Validation Error"));
+            childPath = await SaveFileAsync(form.ChildFile);
         }
 
         var dto = new CreateGeneticRequestDto
-        {
-            FatherFilePath = fatherPath!,
-            MotherFilePath = motherPath!,
-            ChildFilePath = childPath
-        };
+{
+    FatherFilePath = fatherPath,
+    MotherFilePath = motherPath,
+    ChildFilePath = childPath,
+    TestType = form.TestType // ✅ مهم جداً
+};
 
         var requestId = await _service.CreateRequestAsync(userId, dto);
 
@@ -147,19 +123,6 @@ public class GeneticRequestsController : ControllerBase
     }
 
     // ================= PRIVATE =================
-
-    private bool ValidateFile(IFormFile file)
-    {
-        if (file.Length == 0 || file.Length > MaxFileSize)
-            return false;
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-
-        if (!AllowedExtensions.Contains(extension))
-            return false;
-
-        return true;
-    }
 
     private async Task<string> SaveFileAsync(IFormFile file)
     {

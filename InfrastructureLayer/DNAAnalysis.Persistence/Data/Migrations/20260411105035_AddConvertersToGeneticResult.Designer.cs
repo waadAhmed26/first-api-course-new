@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DNAAnalysis.Persistence.Data.Migrations
 {
     [DbContext(typeof(DNAAnalysisDbContext))]
-    [Migration("20260307022549_AddNutritionModule")]
-    partial class AddNutritionModule
+    [Migration("20260411105035_AddConvertersToGeneticResult")]
+    partial class AddConvertersToGeneticResult
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,62 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DNAAnalysis.Domain.Entities.AlarmModule.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<TimeSpan?>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ReminderType")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("Reminders");
+                });
 
             modelBuilder.Entity("DNAAnalysis.Domain.Entities.DrugModule.DrugInteraction", b =>
                 {
@@ -130,6 +186,10 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FatherStatus")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -140,10 +200,6 @@ namespace DNAAnalysis.Persistence.Data.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("MessageToPatient")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MotherStatus")
                         .IsRequired()
@@ -175,16 +231,28 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.Property<int>("Calories")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FoodName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Grams")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MealType")
                         .HasColumnType("int");
 
                     b.Property<int>("NutritionPlanId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -204,8 +272,14 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.Property<double>("CarbsPercentage")
                         .HasColumnType("float");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<double>("FatPercentage")
                         .HasColumnType("float");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("NutritionProfileId")
                         .HasColumnType("int");
@@ -215,6 +289,9 @@ namespace DNAAnalysis.Persistence.Data.Migrations
 
                     b.Property<int>("TotalCalories")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -238,14 +315,23 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
                     b.Property<double>("Height")
                         .HasColumnType("float");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PatientStatus")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -257,6 +343,37 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("NutritionProfiles");
+                });
+
+            modelBuilder.Entity("DNAAnalysis.Domain.Entities.NutritionModule.UserMealSelection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MealSuggestionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealSuggestionId");
+
+                    b.ToTable("UserMealSelections");
                 });
 
             modelBuilder.Entity("DNAAnalysis.Domain.Entities.GeneticModule.GeneticResult", b =>
@@ -290,6 +407,17 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("NutritionProfile");
+                });
+
+            modelBuilder.Entity("DNAAnalysis.Domain.Entities.NutritionModule.UserMealSelection", b =>
+                {
+                    b.HasOne("DNAAnalysis.Domain.Entities.NutritionModule.MealSuggestion", "MealSuggestion")
+                        .WithMany()
+                        .HasForeignKey("MealSuggestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MealSuggestion");
                 });
 
             modelBuilder.Entity("DNAAnalysis.Domain.Entities.GeneticModule.GeneticRequest", b =>

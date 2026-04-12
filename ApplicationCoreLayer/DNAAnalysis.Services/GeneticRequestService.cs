@@ -31,6 +31,10 @@ public class GeneticRequestService : IGeneticRequestService
             FatherFilePath = dto.FatherFilePath,
             MotherFilePath = dto.MotherFilePath,
             ChildFilePath = dto.ChildFilePath,
+
+            // ✅ مهم جداً (ربط UX بالـ backend)
+            TestType = dto.TestType,
+
             CreatedAt = DateTime.UtcNow,
             Status = RequestStatus.Processing
         };
@@ -43,28 +47,34 @@ public class GeneticRequestService : IGeneticRequestService
 
         try
         {
+            // ✅ هنا التعديل المهم
             var result = await _aiClient.AnalyzeAsync(
                 request.FatherFilePath,
                 request.MotherFilePath,
-                request.ChildFilePath);
+                request.ChildFilePath,
+                request.TestType // 🔥 ده اللي كان ناقص
+            );
 
             var geneticResult = new GeneticResult
             {
                 GeneticRequestId = request.Id,
+                Summary = result.Summary, // ✅ مهم
                 FatherStatus = result.FatherStatus,
                 MotherStatus = result.MotherStatus,
                 ChildStatus = result.ChildStatus,
-                MessageToPatient = result.MessageToPatient,
-                Advice = result.Advice
+                Explanation = result.Explanation,
+                Advice = result.Advice,
+                Probabilities = result.Probabilities
             };
 
             await resultRepo.AddAsync(geneticResult);
 
             request.Status = RequestStatus.Completed;
         }
-        catch
+        catch (Exception ex)
         {
             request.Status = RequestStatus.Failed;
+            throw new Exception("AI processing failed", ex);
         }
 
         await _unitOfWork.SaveChangeAsync();
@@ -124,7 +134,7 @@ public class GeneticRequestService : IGeneticRequestService
         var request = await repo.GetByIdAsync(id);
 
         if (request is null)
-            throw new Exception("Request not found");
+            throw new ArgumentException("Request not found");
 
         request.Status = status;
         request.UpdatedAt = DateTime.UtcNow;

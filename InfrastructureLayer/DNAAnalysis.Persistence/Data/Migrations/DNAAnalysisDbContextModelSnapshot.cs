@@ -183,6 +183,10 @@ namespace DNAAnalysis.Persistence.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FatherStatus")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -193,10 +197,6 @@ namespace DNAAnalysis.Persistence.Data.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("MessageToPatient")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MotherStatus")
                         .IsRequired()

@@ -75,7 +75,7 @@ public class ReminderService : IReminderService
                                       !r.IsDeleted);
 
         if (reminder == null)
-            return false;
+    throw new ArgumentException("Reminder not found");
 
         _mapper.Map(dto, reminder);
         reminder.UpdatedAt = DateTime.UtcNow;
@@ -92,8 +92,8 @@ public class ReminderService : IReminderService
                                       r.UserId == userId &&
                                       !r.IsDeleted);
 
-        if (reminder == null)
-            return false;
+       if (reminder == null)
+    throw new ArgumentException("Reminder not found");
 
         reminder.IsDeleted = true;
 
@@ -122,7 +122,7 @@ public class ReminderService : IReminderService
                                       !r.IsDeleted);
 
         if (reminder == null)
-            return false;
+    throw new ArgumentException("Reminder not found");
 
         reminder.Status = ReminderStatus.Completed;
         reminder.UpdatedAt = DateTime.UtcNow;

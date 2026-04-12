@@ -1,3 +1,4 @@
+using DNAAnalysis.API.Responses;
 using DNAAnalysis.Services.Abstraction;
 using DNAAnalysis.Shared.DTOs.Alarm;
 using DNAAnalysis.Shared.Enums;
@@ -27,68 +28,120 @@ public class RemindersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _reminderService.GetAllAsync(GetUserId()));
+        var data = await _reminderService.GetAllAsync(GetUserId());
+
+        return Ok(new ApiResponse<IEnumerable<ReminderDto>>(
+            data,
+            "Reminders retrieved successfully"
+        ));
     }
 
     [HttpGet("status/{status}")]
-    public async Task<IActionResult> GetByStatus(ReminderStatus status)
+    public async Task<IActionResult> GetByStatus([FromRoute] ReminderStatus status)
     {
-        return Ok(await _reminderService.GetByStatusAsync(GetUserId(), status));
+        var data = await _reminderService.GetByStatusAsync(GetUserId(), status);
+
+        return Ok(new ApiResponse<IEnumerable<ReminderDto>>(
+            data,
+            "Reminders retrieved successfully"
+        ));
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById([FromRoute] int id)
     {
         var reminder = await _reminderService.GetByIdAsync(id, GetUserId());
 
         if (reminder == null)
-            return NotFound();
+        {
+            return NotFound(new ApiResponse<string>(
+                new[] { "Reminder not found" },
+                "Not Found"
+            ));
+        }
 
-        return Ok(reminder);
+        return Ok(new ApiResponse<ReminderDto>(
+            reminder,
+            "Reminder retrieved successfully"
+        ));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateReminderDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateReminderDto dto)
     {
-        return Ok(await _reminderService.CreateAsync(GetUserId(), dto));
+        var result = await _reminderService.CreateAsync(GetUserId(), dto);
+
+        return Ok(new ApiResponse<ReminderDto>(
+            result,
+            "Reminder created successfully"
+        ));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateReminderDto dto)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateReminderDto dto)
     {
         var result = await _reminderService.UpdateAsync(id, GetUserId(), dto);
 
         if (!result)
-            return NotFound();
+        {
+            return NotFound(new ApiResponse<string>(
+                new[] { "Reminder not found" },
+                "Not Found"
+            ));
+        }
 
-        return NoContent();
+        return Ok(new ApiResponse<string>(
+            "Reminder updated successfully",
+            "Success"
+        ));
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete([FromRoute] int id)
     {
         var result = await _reminderService.DeleteAsync(id, GetUserId());
 
         if (!result)
-            return NotFound();
+        {
+            return NotFound(new ApiResponse<string>(
+                new[] { "Reminder not found" },
+                "Not Found"
+            ));
+        }
 
-        return NoContent();
+        return Ok(new ApiResponse<string>(
+            "Reminder deleted successfully",
+            "Success"
+        ));
     }
 
     [HttpGet("by-date")]
     public async Task<IActionResult> GetByDate([FromQuery] DateTime date)
     {
-        return Ok(await _reminderService.GetByDateAsync(GetUserId(), date));
+        var data = await _reminderService.GetByDateAsync(GetUserId(), date);
+
+        return Ok(new ApiResponse<IEnumerable<ReminderDto>>(
+            data,
+            "Reminders retrieved successfully"
+        ));
     }
 
     [HttpPut("{id}/complete")]
-    public async Task<IActionResult> Complete(int id)
+    public async Task<IActionResult> Complete([FromRoute] int id)
     {
         var result = await _reminderService.MarkAsCompleteAsync(id, GetUserId());
 
         if (!result)
-            return NotFound();
+        {
+            return NotFound(new ApiResponse<string>(
+                new[] { "Reminder not found" },
+                "Not Found"
+            ));
+        }
 
-        return NoContent();
+        return Ok(new ApiResponse<string>(
+            "Reminder marked as completed",
+            "Success"
+        ));
     }
 }
