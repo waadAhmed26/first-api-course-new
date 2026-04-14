@@ -4,10 +4,11 @@ namespace DNAAnalysis.Shared.GeneticRequestDtos;
 
 public class CreateGeneticRequestDto
 {
-    public string FatherFilePath { get; set; } = default!;
-    public string MotherFilePath { get; set; } = default!;
-    public string? ChildFilePath { get; set; }
+    public string? FatherFilePath { get; set; }
+    public string? MotherFilePath { get; set; }
 
-    // ✅ NEW
+    // ✅ rename for clarity
+    public string? IndividualFilePath { get; set; }
+
     public TestType TestType { get; set; }
 }

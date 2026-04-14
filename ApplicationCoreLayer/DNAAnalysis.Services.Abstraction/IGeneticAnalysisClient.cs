@@ -6,8 +6,8 @@ namespace DNAAnalysis.Services.Abstraction;
 public interface IGeneticAnalysisClient
 {
     Task<GeneticResultDto> AnalyzeAsync(
-        string fatherPath,
-        string motherPath,
+        string? fatherPath,   // ✅ nullable
+        string? motherPath,   // ✅ nullable
         string? childPath,
-        TestType testType); // ✅ NEW
+        TestType testType);
 }

@@ -25,16 +25,18 @@ public class GeneticRequestService : IGeneticRequestService
 
     public async Task<int> CreateRequestAsync(string userId, CreateGeneticRequestDto dto)
     {
+        // ================= CREATE =================
+
         var request = new GeneticRequest
         {
             UserId = userId,
+
+            // ✅ مهم جدًا: بقى nullable
             FatherFilePath = dto.FatherFilePath,
             MotherFilePath = dto.MotherFilePath,
-            ChildFilePath = dto.ChildFilePath,
+            ChildFilePath = dto.IndividualFilePath,
 
-            // ✅ مهم جداً (ربط UX بالـ backend)
             TestType = dto.TestType,
-
             CreatedAt = DateTime.UtcNow,
             Status = RequestStatus.Processing
         };
@@ -47,21 +49,17 @@ public class GeneticRequestService : IGeneticRequestService
 
         try
         {
-            // ✅ هنا التعديل المهم
-            var result = await _aiClient.AnalyzeAsync(
-                request.FatherFilePath,
-                request.MotherFilePath,
-                request.ChildFilePath,
-                request.TestType // 🔥 ده اللي كان ناقص
-            );
+           var result = await _aiClient.AnalyzeAsync(
+    request.FatherFilePath,
+    request.MotherFilePath,
+    request.ChildFilePath,
+    request.TestType
+);
 
             var geneticResult = new GeneticResult
             {
                 GeneticRequestId = request.Id,
-                Summary = result.Summary, // ✅ مهم
-                FatherStatus = result.FatherStatus,
-                MotherStatus = result.MotherStatus,
-                ChildStatus = result.ChildStatus,
+                Summary = result.Summary,
                 Explanation = result.Explanation,
                 Advice = result.Advice,
                 Probabilities = result.Probabilities
@@ -71,10 +69,10 @@ public class GeneticRequestService : IGeneticRequestService
 
             request.Status = RequestStatus.Completed;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
+            // ✅ ما نكسرش السيستم
             request.Status = RequestStatus.Failed;
-            throw new Exception("AI processing failed", ex);
         }
 
         await _unitOfWork.SaveChangeAsync();
@@ -134,7 +132,7 @@ public class GeneticRequestService : IGeneticRequestService
         var request = await repo.GetByIdAsync(id);
 
         if (request is null)
-            throw new ArgumentException("Request not found");
+            throw new ArgumentException("الطلب غير موجود");
 
         request.Status = status;
         request.UpdatedAt = DateTime.UtcNow;

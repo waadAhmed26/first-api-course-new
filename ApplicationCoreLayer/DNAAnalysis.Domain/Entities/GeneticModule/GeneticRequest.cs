@@ -4,8 +4,8 @@ namespace DNAAnalysis.Domain.Entities.GeneticModule
 {
     public class GeneticRequest : BaseEntity<int>
     {
-        public string FatherFilePath { get; set; } = default!;
-        public string MotherFilePath { get; set; } = default!;
+        public string? FatherFilePath { get; set; } = default!;
+        public string? MotherFilePath { get; set; } = default!;
         public string? ChildFilePath { get; set; }
 
         public RequestStatus Status { get; set; } = RequestStatus.Pending;
