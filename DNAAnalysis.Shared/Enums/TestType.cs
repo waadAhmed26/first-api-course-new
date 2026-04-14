@@ -2,6 +2,6 @@ namespace DNAAnalysis.Shared.Enums;
 
 public enum TestType
 {
-    Married = 1,
-    Single = 2
+    MoreThanOne = 1,
+    Individual = 2
 }

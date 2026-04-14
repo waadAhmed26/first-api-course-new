@@ -22,6 +22,7 @@ using DNAAnalysis.ServiceAbstraction;
 using Microsoft.AspNetCore.Mvc;
 using DNAAnalysis.API.Responses;
 using System.Text.Json;
+using DNAAnalysis.API.Filters; // ✅ مهم جدًا
 
 // ================= SERILOG CONFIG =================
 Log.Logger = new LoggerConfiguration()
@@ -38,6 +39,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
+    // 🔐 JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -62,6 +64,9 @@ builder.Services.AddSwaggerGen(options =>
             new string[] {}
         }
     });
+
+    // ✅ FIX: enum يظهر بالكلام مش أرقام
+    options.SchemaFilter<EnumSchemaFilter>();
 });
 
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
@@ -115,6 +120,8 @@ builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// ✅ Fake AI (زي ما إنتي عايزة)
 builder.Services.AddScoped<IGeneticAnalysisClient, FakeGeneticAnalysisClient>();
 
 // ================= FluentValidation =================
@@ -142,7 +149,7 @@ builder.Services.AddScoped<INutritionService, NutritionService>();
 // ===== Alarm Module Service =====
 builder.Services.AddScoped<IReminderService, ReminderService>();
 
-// ================= JWT Authentication (🔥 المهم هنا) =================
+// ================= JWT Authentication =================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -163,7 +170,6 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["JwtOptions:SecretKey"]!))
     };
 
-    // 🔥 هنا بقى السحر
     options.Events = new JwtBearerEvents
     {
         OnChallenge = async context =>

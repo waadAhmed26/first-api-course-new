@@ -2,11 +2,7 @@ namespace DNAAnalysis.Domain.Entities.GeneticModule;
 
 public class GeneticResult : BaseEntity<int>
 {
-    public string Summary { get; set; } = default!; // ✅ NEW
-
-    public string FatherStatus { get; set; } = default!;
-    public string MotherStatus { get; set; } = default!;
-    public string? ChildStatus { get; set; }
+    public string Summary { get; set; } = default!;
 
     public string Explanation { get; set; } = default!;
 

@@ -5,6 +5,8 @@ using DNAAnalysis.Services.Abstraction;
 using DNAAnalysis.Shared.GeneticRequestDtos;
 using DNAAnalysis.Api.Requests;
 using DNAAnalysis.API.Responses;
+using DNAAnalysis.Shared.Enums;
+using DNAAnalysis.API.Validators;
 
 namespace DNAAnalysis.Api.Controllers;
 
@@ -19,46 +21,60 @@ public class GeneticRequestsController : ControllerBase
         _service = service;
     }
 
-    // ================= USER =================
+    // ================= CREATE =================
 
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> Create([FromForm] CreateGeneticRequestFormDto form)
+   [Authorize]
+[HttpPost]
+public async Task<ActionResult<ApiResponse<object>>> Create([FromForm] CreateGeneticRequestFormDto form)
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (userId is null)
+        return Unauthorized(new ApiResponse<string>(
+            new List<string> { "Unauthorized" },
+            "User not authenticated"));
+
+    // ✅ VALIDATION (NEW)
+    var errors = GeneticRequestValidator.Validate(
+        form.FatherFile,
+        form.MotherFile,
+        form.IndividualFile,
+        form.TestType);
+
+    if (errors.Any())
+        return BadRequest(new ApiResponse<string>(errors, "Validation error"));
+
+    string? fatherPath = null;
+    string? motherPath = null;
+    string? individualPath = null;
+
+    // ✅ SAVE FILES AFTER VALIDATION
+    if (form.TestType == TestType.MoreThanOne)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (userId is null)
-            return Unauthorized(new ApiResponse<string>(
-                new List<string> { "Unauthorized" }, "User not authenticated"));
-
-        string? fatherPath;
-        string? motherPath;
-        string? childPath = null;
-
-        // ✅ Save Father & Mother (Required)
         fatherPath = await SaveFileAsync(form.FatherFile!);
         motherPath = await SaveFileAsync(form.MotherFile!);
-
-        // ✅ Save Child (Optional)
-        if (form.ChildFile != null)
-        {
-            childPath = await SaveFileAsync(form.ChildFile);
-        }
-
-        var dto = new CreateGeneticRequestDto
-{
-    FatherFilePath = fatherPath,
-    MotherFilePath = motherPath,
-    ChildFilePath = childPath,
-    TestType = form.TestType // ✅ مهم جداً
-};
-
-        var requestId = await _service.CreateRequestAsync(userId, dto);
-
-        return Ok(new ApiResponse<object>(
-            new { Id = requestId },
-            "Genetic request created successfully"));
     }
+    else
+    {
+        individualPath = await SaveFileAsync(form.IndividualFile!);
+    }
+
+    var dto = new CreateGeneticRequestDto
+    {
+        FatherFilePath = fatherPath,
+        MotherFilePath = motherPath,
+        IndividualFilePath = individualPath,
+        TestType = form.TestType
+    };
+
+    var requestId = await _service.CreateRequestAsync(userId, dto);
+
+    return Ok(new ApiResponse<object>(
+        new { Id = requestId },
+        "Genetic request created successfully"));
+}
+
+    // ================= USER =================
 
     [Authorize]
     [HttpGet("my")]
@@ -66,36 +82,9 @@ public class GeneticRequestsController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (userId is null)
-            return Unauthorized(new ApiResponse<string>(
-                new List<string> { "Unauthorized" }, "User not authenticated"));
+        var data = await _service.GetUserRequestsAsync(userId!);
 
-        var requests = await _service.GetUserRequestsAsync(userId);
-
-        return Ok(new ApiResponse<object>(
-            requests,
-            "User requests retrieved successfully"));
-    }
-
-    [Authorize]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<object>>> GetById(int id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (userId is null)
-            return Unauthorized(new ApiResponse<string>(
-                new List<string> { "Unauthorized" }, "User not authenticated"));
-
-        var request = await _service.GetByIdForUserAsync(id, userId, User.IsInRole("Admin"));
-
-        if (request is null)
-            return NotFound(new ApiResponse<string>(
-                new List<string> { "Request not found" }, "Not Found"));
-
-        return Ok(new ApiResponse<object>(
-            request,
-            "Request retrieved successfully"));
+        return Ok(new ApiResponse<object>(data));
     }
 
     // ================= ADMIN =================
@@ -104,22 +93,42 @@ public class GeneticRequestsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ApiResponse<object>>> GetAll()
     {
-        var requests = await _service.GetAllRequestsAsync();
+        var data = await _service.GetAllRequestsAsync();
 
-        return Ok(new ApiResponse<object>(
-            requests,
-            "All requests retrieved successfully"));
+        return Ok(new ApiResponse<object>(data));
     }
+
+    // ================= DETAILS =================
+
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<object>>> GetById(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        var result = await _service.GetByIdForUserAsync(id, userId!, isAdmin);
+
+        if (result == null)
+            return NotFound(new ApiResponse<string>(
+                new List<string> { "Request not found" }, "Not Found"));
+
+        return Ok(new ApiResponse<object>(result));
+    }
+
+    // ================= UPDATE STATUS =================
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{id}/status")]
-    public async Task<ActionResult<ApiResponse<string>>> UpdateStatus(int id, UpdateRequestStatusDto dto)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateStatus(
+        int id,
+        [FromBody] UpdateRequestStatusDto dto)
     {
         await _service.UpdateStatusAsync(id, dto.Status);
 
-        return Ok(new ApiResponse<string>(
-            "Status updated successfully",
-            "Update completed"));
+        return Ok(new ApiResponse<EmptyResponse>(
+    new EmptyResponse(),
+    "Status updated successfully"));
     }
 
     // ================= PRIVATE =================

@@ -13,24 +13,22 @@ namespace DNAAnalysis.Persistence.Configurations.Genetic
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.FatherStatus)
+            // ✅ Summary
+            builder.Property(x => x.Summary)
                    .IsRequired()
-                   .HasMaxLength(100);
+                   .HasMaxLength(200);
 
-            builder.Property(x => x.MotherStatus)
-                   .IsRequired()
-                   .HasMaxLength(100);
-
+            // ✅ Explanation
             builder.Property(x => x.Explanation)
                    .IsRequired();
 
-            // 🔹 Converter
+            // 🔹 Converter for Advice
             var converter = new ValueConverter<List<string>, string>(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                 v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null)!
             );
 
-            // 🔹 Comparer
+            // 🔹 Comparer for Advice
             var comparer = new ValueComparer<List<string>>(
                 (c1, c2) => c1!.SequenceEqual(c2!),
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
@@ -60,6 +58,7 @@ namespace DNAAnalysis.Persistence.Configurations.Genetic
             probProperty.HasConversion(probConverter);
             probProperty.Metadata.SetValueComparer(probComparer);
 
+            // 🔗 Relation
             builder.HasOne(x => x.GeneticRequest)
                    .WithOne(x => x.Result)
                    .HasForeignKey<GeneticResult>(x => x.GeneticRequestId);

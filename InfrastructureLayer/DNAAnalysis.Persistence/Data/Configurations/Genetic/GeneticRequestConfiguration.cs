@@ -10,11 +10,11 @@ namespace DNAAnalysis.Persistence.Configurations.Genetic
         {
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.FatherFilePath)
-                   .IsRequired();
+           builder.Property(x => x.FatherFilePath)
+       .IsRequired(false);
 
-            builder.Property(x => x.MotherFilePath)
-                   .IsRequired();
+builder.Property(x => x.MotherFilePath)
+       .IsRequired(false);
 
             builder.Property(x => x.UserId)
                    .IsRequired();
